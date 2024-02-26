@@ -25,6 +25,9 @@ source = "vcs"
 [tool.hatch.build.hooks.vcs]
 version-file = "src/scverse_plotting_api/_version.py"
 
+[tool.hatch.envs.default]
+extra-dependencies = ["ipykernel"]
+
 [tool.ruff.format]
 docstring-code-format = true
 
@@ -47,3 +50,5 @@ ignore = [
 [tool.ruff.lint.isort]
 known-first-party = ["scverse_plotting_api"]
 required-imports = ["from __future__ import annotations"]
+[tool.ruff.lint.flake8-type-checking]
+strict = true
