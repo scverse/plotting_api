@@ -1,0 +1,49 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling", "hatch-vcs"]
+
+[project]
+name = "scverse-plotting-api"
+requires-python = ">=3.9"
+license = "BSD-3-Clause"
+authors = [
+    { name = "Gregor Sturm" },
+    { name = "Philipp Angerer" },
+]
+readme = "README.md"
+dependencies = [
+    "matplotlib",
+    "anndata",
+    "scanpy",
+]
+dynamic = ["version"]
+urls.Homepage = "https://github.com/scverse/plotting_api"
+urls.Issues = "https://github.com/scverse/plotting_api/issues"
+
+[tool.hatch.version]
+source = "vcs"
+[tool.hatch.build.hooks.vcs]
+version-file = "src/scverse_plotting_api/_version.py"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    "E",   # Error detected by Pycodestyle
+    "F",   # Errors detected by Pyflakes
+    "W",   # Warning detected by Pycodestyle
+    "UP",  # pyupgrade
+    "I",   # isort
+    "TCH", # manage type checking blocks
+    "ICN", # Follow import conventions
+    "PTH", # Pathlib instead of os.path
+    "EM",  # Better tracebacks by using variables for error messages
+]
+ignore = [
+    # allow I, O, l as variable names -> I is the identity matrix, i, j, k, l is reasonable indexing notation
+    "E741",
+]
+[tool.ruff.lint.isort]
+known-first-party = ["scverse_plotting_api"]
+required-imports = ["from __future__ import annotations"]
