@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import inspect
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, TypedDict
+from functools import wraps
+from itertools import islice
+from typing import TYPE_CHECKING, TypedDict, overload
 
 from matplotlib import get_backend
 from matplotlib.axes import Axes
@@ -9,16 +12,92 @@ from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec, SubplotSpec
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-    from typing import Unpack
+    from collections.abc import Callable, Generator
+    from typing import Generic, ParamSpec, Protocol, Unpack
 
     from matplotlib.gridspec import GridSpecFromSubplotSpec
+
+    P = ParamSpec("P")
+
+    class PlottingImpl(Protocol, Generic[P]):
+        def __call__(
+            self,
+            *args: P.args,
+            fig: Figure,
+            gs: GridSpec | GridSpecFromSubplotSpec,
+            **kwds: P.kwargs,
+        ) -> None:
+            ...
+
+    class PlottingAPI(Protocol, Generic[P]):
+        @overload
+        def __call__(self, *args: P.args, ax: None = None, **kwds: P.kwargs) -> Figure:
+            ...
+
+        @overload
+        def __call__(
+            self, *args: P.args, ax: Axes | SubplotSpec, **kwds: P.kwargs
+        ) -> None:
+            ...
 
 
 class GSParams(TypedDict, total=False):
     nrows: int
     ncols: int
     width_ratios: tuple[float, float]
+
+
+def plot_decorator(
+    **gridspec_params: Unpack[GSParams],
+) -> Callable[[PlottingImpl[P]], PlottingAPI[P]]:
+    def decorator(f: PlottingImpl[P]) -> PlottingAPI[P]:
+        @overload
+        def wrapper(
+            *args: P.args,
+            ax: None = None,
+            **kwargs: P.kwargs,
+        ) -> Figure:
+            ...
+
+        @overload
+        def wrapper(
+            *args: P.args,
+            ax: Axes | SubplotSpec,
+            **kwargs: P.kwargs,
+        ) -> None:
+            ...
+
+        @wraps(f)
+        def wrapper(
+            *args: P.args,
+            ax: Axes | SubplotSpec | None = None,
+            **kwargs: P.kwargs,
+        ) -> Figure | None:
+            with plot_context(ax, **gridspec_params) as (fig, gs):
+                rv = f(*args, fig=fig, gs=gs, **kwargs)  # type: ignore[func-returns-value]
+                if rv is not None:
+                    name = getattr(f, "__name__", "function")
+                    msg = f"{name}’ definition should not return anything"
+                    raise TypeError(msg)
+            return fig if ax is None else None
+
+        ax_param = inspect.Parameter(
+            "ax", inspect.Parameter.POSITIONAL_ONLY, annotation=Axes | SubplotSpec
+        )
+        del wrapper.__annotations__["fig"]
+        del wrapper.__annotations__["gs"]
+        wrapper.__annotations__["ax"] = ax_param.annotation
+
+        wrapper.__signature__ = (sig := inspect.signature(f)).replace(  # type: ignore[attr-defined]
+            parameters=[
+                ax_param,
+                *islice(sig.parameters.values(), 2, None),
+            ]
+        )
+
+        return wrapper
+
+    return decorator
 
 
 @contextmanager
