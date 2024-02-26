@@ -24,10 +24,13 @@ def plot_decorator(
     f: Callable[Concatenate[Figure, GridSpec, P], R],
 ) -> Callable[Concatenate[Axes | SubplotSpec, P], R]:
     @wraps(f)
-    def wrapper(ax, *args, **kwargs):
+    def wrapper(ax: Axes, *args: P.args, **kwargs: P.kwargs) -> R:
         with plot_context(ax) as (fig, gs):
-            f(fig, gs, *args, **kwargs)
-        if ax is not None:
+            rv = f(fig, gs, *args, **kwargs)
+            if rv is not None:
+                msg = f"{f.__name__}’ definition should not return anything"
+                raise TypeError(msg)
+        if ax is None:
             return fig
 
     ax_param = inspect.Parameter(
@@ -59,9 +62,11 @@ def plot_context(
         gs = GridSpec(figure=fig, **gridspec_params)
     elif isinstance(ax, SubplotSpec):
         fig = ax.get_gridspec().figure
+        assert fig is not None
         gs = ax.subgridspec(**gridspec_params)
     elif isinstance(ax, Axes):
         fig = ax.get_figure()
+        assert fig is not None
         if ax.get_subplotspec() is None:
             msg = (
                 "Ax object must be based on a gridspec, "
@@ -80,8 +85,8 @@ def plot_context(
     # epilogue
     if not ax_was_provided:
         if get_backend() == "module://matplotlib_inline.backend_inline":
-            from matplotlib import pyplot as plt
+            from matplotlib_inline import backend_inline
 
-            plt.close()
+            backend_inline.show(close=True)
         else:
-            fig.show()
+            fig.show(warn=True)
