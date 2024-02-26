@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 
 
-@plot_decorator
+@plot_decorator(nrows=1, ncols=2, width_ratios=(0.7, 0.1))
 def plot_umap(
     adata: AnnData, color: str, *, fig: Figure, gs: GridSpec | GridSpecFromSubplotSpec
 ) -> None:
