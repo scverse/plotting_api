@@ -31,7 +31,7 @@ extra-dependencies = ["ipykernel"]
 [tool.mypy]
 strict = true
 explicit_package_bases = true
-mypy_path = ["$MYPY_CONFIG_FILE_DIR/stubs", "$MYPY_CONFIG_FILE_DIR/src"]
+mypy_path = ["$MYPY_CONFIG_FILE_DIR/src"]
 
 [tool.ruff.format]
 docstring-code-format = true
