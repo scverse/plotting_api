@@ -34,7 +34,7 @@ def plot_context(
     fig: Figure | None
     gs: GridSpec | GridSpecFromSubplotSpec
     if not ax_was_provided:
-        fig = Figure(layout="tight")
+        fig = Figure(layout="constrained")
         gs = GridSpec(figure=fig, **gridspec_params)
     elif isinstance(ax, SubplotSpec):
         fig = ax.get_gridspec().figure
