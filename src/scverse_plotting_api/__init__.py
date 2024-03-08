@@ -1,35 +1,54 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, TypedDict, overload
 
 import scanpy as sc
 
 from scverse_plotting_api.helpers import plot_context
 
 if TYPE_CHECKING:
+    from collections.abc import Collection
+    from typing import Required, Unpack
+
     from anndata import AnnData
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
-    from matplotlib.gridspec import SubplotSpec
+    from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec, SubplotSpec
+
+
+class UmapArgs(TypedDict, total=False):
+    color: Required[Collection[str]]
 
 
 @overload
-def plot_umap(adata: AnnData, color: str, *, ax: None = None) -> Figure: ...
+def plot_umap(adata: AnnData, *, ax: None = None, **kw: Unpack[UmapArgs]) -> Figure: ...
 
 
 @overload
-def plot_umap(adata: AnnData, color: str, *, ax: Axes | SubplotSpec) -> None: ...
+def plot_umap(
+    adata: AnnData, *, ax: Axes | SubplotSpec, **kw: Unpack[UmapArgs]
+) -> None: ...
 
 
 def plot_umap(
-    adata: AnnData, color: str, *, ax: Axes | SubplotSpec | None = None
+    adata: AnnData, *, ax: Axes | SubplotSpec | None = None, **kw: Unpack[UmapArgs]
 ) -> Figure | None:
-    with plot_context(ax, ncols=2, width_ratios=(0.7, 0.1)) as (fig, gs):
-        main_ax = fig.add_subplot(gs[0, 0])
-        cbar_ax = fig.add_subplot(gs[0, 1])
-        x, y = zip(*adata.obsm["X_umap"])
-        scatter = main_ax.scatter(
-            x, y, s=3, c=sc.get.obs_df(adata, color).values, cmap="viridis"
-        )
-        fig.colorbar(scatter, cax=cbar_ax)
+    with plot_context(ax, ncols=len(kw["color"])) as (fig, gs):
+        _plot_umap_inner(adata, fig=fig, gs=gs, **kw)
     return fig if ax is None else None
+
+
+def _plot_umap_inner(
+    adata: AnnData,
+    *,
+    fig: Figure,
+    gs: GridSpec | GridSpecFromSubplotSpec,
+    **kw: Unpack[UmapArgs],
+) -> None:
+    axs = gs.subplots(squeeze=False)
+    x, y = zip(*adata.obsm["X_umap"])
+    for c, ax in zip(kw["color"], axs.flat):
+        scatter = ax.scatter(
+            x, y, s=3, c=sc.get.obs_df(adata, c).values, cmap="viridis"
+        )
+    fig.colorbar(scatter, ax=axs[...])
