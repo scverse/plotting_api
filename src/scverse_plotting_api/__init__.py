@@ -14,13 +14,11 @@ if TYPE_CHECKING:
 
 
 @overload
-def plot_umap(adata: AnnData, color: str, *, ax: None = None) -> Figure:
-    ...
+def plot_umap(adata: AnnData, color: str, *, ax: None = None) -> Figure: ...
 
 
 @overload
-def plot_umap(adata: AnnData, color: str, *, ax: Axes | SubplotSpec) -> None:
-    ...
+def plot_umap(adata: AnnData, color: str, *, ax: Axes | SubplotSpec) -> None: ...
 
 
 def plot_umap(
