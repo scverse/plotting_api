@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypedDict, overload
 
+import numpy as np
 import scanpy as sc
 
 from scverse_plotting_api.helpers import plot_context
@@ -26,14 +27,17 @@ def plot_umap(adata: AnnData, *, ax: None = None, **kw: Unpack[UmapArgs]) -> Fig
 
 @overload
 def plot_umap(
-    adata: AnnData, *, ax: Axes | SubplotSpec, **kw: Unpack[UmapArgs]
+    adata: AnnData, *, ax: Axes | GridSpec | SubplotSpec, **kw: Unpack[UmapArgs]
 ) -> None: ...
 
 
 def plot_umap(
-    adata: AnnData, *, ax: Axes | SubplotSpec | None = None, **kw: Unpack[UmapArgs]
+    adata: AnnData,
+    *,
+    ax: Axes | GridSpec | SubplotSpec | None = None,
+    **kw: Unpack[UmapArgs],
 ) -> Figure | None:
-    with plot_context(ax, ncols=len(kw["color"])) as (fig, gs):
+    with plot_context(ax, n_plots=len(kw["color"])) as (fig, gs):
         _plot_umap_inner(adata, fig=fig, gs=gs, **kw)
     return fig if ax is None else None
 
@@ -45,10 +49,11 @@ def _plot_umap_inner(
     gs: GridSpec | GridSpecFromSubplotSpec,
     **kw: Unpack[UmapArgs],
 ) -> None:
-    axs = gs.subplots(squeeze=False)
+    axs = np.empty(len(kw["color"]), dtype=object)
     x, y = zip(*adata.obsm["X_umap"])
-    for c, ax in zip(kw["color"], axs.flat):
-        scatter = ax.scatter(
+    for i, c in enumerate(kw["color"]):
+        axs[i] = fig.add_subplot(gs[i], sharex=axs[0], sharey=axs[0])
+        scatter = axs[i].scatter(
             x, y, s=3, c=sc.get.obs_df(adata, c).values, cmap="viridis"
         )
-    fig.colorbar(scatter, ax=axs[...])
+    fig.colorbar(scatter, ax=axs)
