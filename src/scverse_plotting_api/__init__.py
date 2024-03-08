@@ -53,7 +53,5 @@ def _plot_umap_inner(
     x, y = zip(*adata.obsm["X_umap"])
     for i, c in enumerate(kw["color"]):
         axs[i] = fig.add_subplot(gs[i], sharex=axs[0], sharey=axs[0])
-        scatter = axs[i].scatter(
-            x, y, s=3, c=sc.get.obs_df(adata, c).values, cmap="viridis"
-        )
+        scatter = axs[i].scatter(x, y, s=3, c=sc.get.obs_df(adata, c).values)
     fig.colorbar(scatter, ax=axs)
