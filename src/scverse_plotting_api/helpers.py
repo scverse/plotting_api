@@ -3,6 +3,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, TypedDict
 
+import numpy as np
 from matplotlib import get_backend
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -26,7 +27,8 @@ def plot_context(
 ) -> Generator[tuple[Figure, GridSpec | GridSpecFromSubplotSpec], None, None]:
     # prologue
     ax_was_provided = ax is not None
-    gridspec_params = GSParams(nrows=1, ncols=n_plots)
+
+    gridspec_params = infer_gs_params(n_plots)
 
     fig: Figure | None
     gs: GridSpec | GridSpecFromSubplotSpec
@@ -72,3 +74,20 @@ def plot_context(
             backend_inline.show(close=True)
         else:
             fig.show(warn=True)
+
+
+def infer_gs_params(n_plots: int) -> GSParams:
+    from matplotlib import rcParams
+
+    w, h = rcParams["figure.figsize"]
+    n_vert, n_horiz = _infer_dimensions(n_plots, w / h)
+    return GSParams(nrows=n_vert, ncols=n_horiz)
+
+
+def _infer_dimensions(n: int, a: float) -> tuple[int, int]:
+    widths = np.arange(1, n + 1)
+    heights = (n + widths - 1) // widths
+    deviations = np.abs((widths / heights) - a)
+
+    index = np.argmin(deviations)
+    return heights[index], widths[index]

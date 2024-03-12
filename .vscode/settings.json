@@ -1,5 +1,6 @@
 {
   "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["-vv", "--color=yes"],
   "python.analysis.typeCheckingMode": "basic",
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
