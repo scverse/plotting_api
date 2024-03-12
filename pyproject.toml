@@ -26,7 +26,9 @@ source = "vcs"
 version-file = "src/scverse_plotting_api/_version.py"
 
 [tool.hatch.envs.default]
-extra-dependencies = ["ipykernel"]
+extra-dependencies = ["ipykernel", "pytest"]
+[tool.hatch.envs.default.scripts]
+test = "pytest -vv {args}"
 
 [tool.mypy]
 strict = true
