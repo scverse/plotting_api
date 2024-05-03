@@ -26,6 +26,10 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: packages
           cache-dependency-path: pyproject.toml
-      - run: uv pip install -e .[all] pytest mypy
-      - run: pytest -vv --color=yes
+      - run: uv pip install -e .[all] coverage pytest mypy
+      - run: coverage run -m pytest -vv --color=yes
+      - uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
       - run: mypy .

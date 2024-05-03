@@ -27,14 +27,29 @@ source = "vcs"
 [tool.hatch.build.hooks.vcs]
 version-file = "src/scverse_plotting_api/_version.py"
 
-[tool.hatch.envs.default]
+[tool.hatch.envs.hatch-test]
 extra-dependencies = ["ipykernel"]
+features = ["all"]
 
 [tool.mypy]
 strict = true
 explicit_package_bases = true
 disable_error_code = ["import-untyped"]
 mypy_path = ["$MYPY_CONFIG_FILE_DIR/src"]
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+source_pkgs = ["scverse_plotting_api"]
+[tool.coverage.paths]
+source = [".", "**/site-packages"]
+[tool.coverage.report]
+exclude_also = [
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
 
 [tool.ruff.format]
 docstring-code-format = true
