@@ -26,6 +26,6 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: packages
           cache-dependency-path: pyproject.toml
-      - run: uv pip install -e . pytest mypy
+      - run: uv pip install -e .[all] pytest mypy
       - run: pytest -vv --color=yes
       - run: mypy .
