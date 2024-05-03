@@ -8,8 +8,13 @@ import scanpy as sc
 from scverse_plotting_api.helpers import plot_context
 
 if TYPE_CHECKING:
+    import sys
     from collections.abc import Collection
-    from typing import Required, Unpack
+
+    if sys.version_info >= (3, 11):
+        from typing import Required, Unpack
+    else:
+        from typing_extensions import Required, Unpack
 
     from anndata import AnnData
     from matplotlib.axes import Axes
