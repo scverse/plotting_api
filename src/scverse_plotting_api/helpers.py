@@ -9,8 +9,13 @@ from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec, SubplotSpec
 
 if TYPE_CHECKING:
+    import sys
     from collections.abc import Generator
-    from typing import Unpack
+
+    if sys.version_info >= (3, 11):
+        from typing import Unpack
+    else:
+        from typing_extensions import Unpack
 
     from matplotlib.gridspec import GridSpecFromSubplotSpec
 
