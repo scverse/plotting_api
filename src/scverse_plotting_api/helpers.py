@@ -10,6 +10,7 @@ from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec, SubplotSpec
 
 if TYPE_CHECKING:
+    import sys
     from collections.abc import Generator
 
     from matplotlib.gridspec import GridSpecFromSubplotSpec

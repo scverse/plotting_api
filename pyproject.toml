@@ -19,6 +19,8 @@ dependencies = [
 dynamic = ["version"]
 urls.Homepage = "https://github.com/scverse/plotting_api"
 urls.Issues = "https://github.com/scverse/plotting_api/issues"
+[project.optional-dependencies]
+all = ["matplotlib-inline"]
 
 [tool.hatch.version]
 source = "vcs"
@@ -31,6 +33,7 @@ extra-dependencies = ["ipykernel"]
 [tool.mypy]
 strict = true
 explicit_package_bases = true
+disable_error_code = ["import-untyped"]
 mypy_path = ["$MYPY_CONFIG_FILE_DIR/src"]
 
 [tool.ruff.format]

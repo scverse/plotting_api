@@ -1,0 +1,31 @@
+name: Unit Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash -e {0} # -e to fail on error
+jobs:
+  run_tester:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: blob:none
+      - uses: drivendataorg/setup-python-uv-action@main
+        with:
+          python-version: ${{ matrix.python }}
+          cache: packages
+          cache-dependency-path: pyproject.toml
+      - run: uv pip install -e .[all] pytest mypy
+      - run: pytest -vv --color=yes
+      - run: mypy .
