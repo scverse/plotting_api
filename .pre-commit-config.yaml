@@ -27,11 +27,13 @@ repos:
     rev: v1.10.0
     hooks:
       - id: mypy
+        args: []
         additional_dependencies:
           - anndata
           - scanpy
           - matplotlib
           - matplotlib-inline
+          - pytest
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v4.0.0-alpha.8
     hooks:
